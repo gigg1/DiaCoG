@@ -4,6 +4,8 @@ Official implementation of the paper *Probing diametric coordination graphs for 
 ## Overview
 **DiaCoG (Diametric Coordination Graph)** integrating two views of agents' observations to model implicit coordination graphs: **consistency** (shared similarities) and **discrepancy** (unique differences). The paper develops two variants, **DiaCoG-DE** under Centralized Training and Decentralized Execution (CTDE) and **DiaCoG-CE** under Centralized Training and Centralized Execution (CTCE).
 
+![Overview of the DiaCoG framework](assets/diacog_framework.png)
+
 ## Repository contents
 1. **DiaCoG** — reference implementation of **DiaCoG-DE** (CTDE) and
    **DiaCoG-CE** (CTCE).
