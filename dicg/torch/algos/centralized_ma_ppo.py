@@ -89,7 +89,6 @@ class CentralizedMAPPO(MABatchPolopt):
         self._lr_clip_range = lr_clip_range
         self._eps = 1e-8
         self.device = device
-        print ("-------mappo self.device:", self.device)
 
         self._maximum_entropy = (entropy_method == 'max')
         self._entropy_regularzied = (entropy_method == 'regularized')

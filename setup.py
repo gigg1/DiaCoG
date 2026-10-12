@@ -5,8 +5,8 @@ with open('README.md') as f:
     README = f.read()
     
 setup(
-    name='DICG',
-    version='0.0.0',
+    name='DiaCoG',
+    version='1.0.0',
     packages=find_packages(),
     python_requires='>=3.7',
     install_requires=[],

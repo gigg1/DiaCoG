@@ -145,11 +145,6 @@ def run(args):
             policy.to(device)
             baseline.to(device)
 
-            device_of_model = next(policy.categorical_output_layer.parameters()).device
-            print(f"Model device (via first parameter): {device_of_model}")
-            device_of_model = next(policy.encoder.parameters()).device
-            print(f"Model device (via first parameter): {device_of_model}")
-
             # Set max_path_length <= max_steps
             # If max_path_length > max_steps, algo will pad obs
             algo = CentralizedMAPPO(
