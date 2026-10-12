@@ -56,41 +56,6 @@ SMAC is not included in this repository.
 
 ---
 
-## Baselines
-Every runner takes a detailed argument list; run with `-h` to see all options (environment size, number of agents, network sizes, PPO hyperparameters, etc.). Model checkpoints and logs are written to `./data/local/` relative to the directory the command is launched from.
-
-### Predator-Prey
-
-```bash
-cd exp_runners/predatorprey/
-```
-
-| Approach | Command |
-|--|--|
-| CENT-MLP | `python cent_predatorprey_runner.py --penalty P --seed 1` |
-| DEC-MLP | `python dec_predatorprey_runner.py --penalty P --seed 1` |
-| DICG-CE-MLP | `python dicg_ce_predatorprey_runner.py --penalty P --seed 1` |
-| DICG-DE-MLP | `python dicg_de_predatorprey_runner.py --penalty P --seed 1` |
-
-Replace the penalty `P` with one of `0`, `-1`, `-1.25` or `-1.5`, and use `--seed` `1` to `5` for the averaged runs.
-
-### Traffic Junction
-
-```bash
-cd exp_runners/traffic/
-```
-
-| Approach | Command |
-|--|--|
-| CENT-MLP | `python cent_traffic_runner.py --difficulty D --seed 1` |
-| DEC-MLP | `python dec_traffic_runner.py --difficulty D --seed 1` |
-| DICG-CE-MLP | `python dicg_ce_traffic_runner.py --difficulty D --seed 1` |
-| DICG-DE-MLP | `python dicg_de_traffic_runner.py --difficulty D --seed 1` |
-
-Replace the difficulty `D` with one of `easy`, `medium` or `hard`, and use `--seed` `1` to `5` for the averaged runs.
-
----
-
 ## DiaCoG
 
 Both DiaCoG variants share the same diametric graph structure and the learned nonlinear value aggregation. They differ in where the graph embeddings `Z` are used, following the CTDE / CTCE split described in the paper:
@@ -140,6 +105,41 @@ Replace the difficulty `D` with one of `easy`, `medium` or `hard`. See the runne
 
 ---
 
+## Baselines
+Every runner takes a detailed argument list; run with `-h` to see all options (environment size, number of agents, network sizes, PPO hyperparameters, etc.). Model checkpoints and logs are written to `./data/local/` relative to the directory the command is launched from.
+
+### Predator-Prey
+
+```bash
+cd exp_runners/predatorprey/
+```
+
+| Approach | Command |
+|--|--|
+| CENT-MLP | `python cent_predatorprey_runner.py --penalty P --seed 1` |
+| DEC-MLP | `python dec_predatorprey_runner.py --penalty P --seed 1` |
+| DICG-CE-MLP | `python dicg_ce_predatorprey_runner.py --penalty P --seed 1` |
+| DICG-DE-MLP | `python dicg_de_predatorprey_runner.py --penalty P --seed 1` |
+
+Replace the penalty `P` with one of `0`, `-1`, `-1.25` or `-1.5`, and use `--seed` `1` to `5` for the averaged runs.
+
+### Traffic Junction
+
+```bash
+cd exp_runners/traffic/
+```
+
+| Approach | Command |
+|--|--|
+| CENT-MLP | `python cent_traffic_runner.py --difficulty D --seed 1` |
+| DEC-MLP | `python dec_traffic_runner.py --difficulty D --seed 1` |
+| DICG-CE-MLP | `python dicg_ce_traffic_runner.py --difficulty D --seed 1` |
+| DICG-DE-MLP | `python dicg_de_traffic_runner.py --difficulty D --seed 1` |
+
+Replace the difficulty `D` with one of `easy`, `medium` or `hard`, and use `--seed` `1` to `5` for the averaged runs.
+
+---
+
 ## Evaluation modes
 
 Each runner supports several modes through `--mode`:
@@ -149,7 +149,6 @@ Each runner supports several modes through `--mode`:
 | `train` (default) | Train from scratch. |
 | `restore` | Resume training from the last checkpoint in `--exp_name`. |
 | `eval` | Evaluate a saved checkpoint and report returns / success rates. |
-|--|--|
 
 Experiment directories are named after the hyperparameters used to launch them, so `--exp_name` must match the directory created at training time.
 
