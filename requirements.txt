@@ -61,15 +61,12 @@ Pygments==2.6.1
 pyparsing==2.4.7
 PyPrind==2.11.2
 pyrsistent==0.16.0
-PySC2==3.0.0
 python-dateutil==2.8.1
 PyWavelets==1.1.1
 PyYAML==5.3.1
 ray==0.8.6
 redis==3.4.1
 requests==2.23.0
-s2clientprotocol==4.11.4.78285.0
-s2protocol==4.11.4.78285.0
 scikit-image==0.16.2
 scipy==1.4.1
 six==1.14.0
@@ -91,7 +88,6 @@ whichcraft==0.6.1
 wrapt==1.12.1
 yarl==1.4.2
 zipp==3.1.0
-git+https://github.com/oxwhirl/smac.git
 tmuxp
 pysftp
 tikzplotlib
