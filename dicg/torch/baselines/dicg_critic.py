@@ -45,7 +45,7 @@ class DICGCritic(DICGBase):
         elif aggregator_type == 'direct':
             aggregator_input_dim = embedding_dim * self._n_agents
         elif aggregator_type == 'nonl':
-            # 新增：非线性混合器MLP
+            # Added: nonlinear mixer MLP
             aggregator_input_dim = embedding_dim
             mixer_hidden_sizes = (64, 32)
             self.value_mixer = self._build_mixer_mlp(mixer_hidden_sizes)
@@ -61,28 +61,28 @@ class DICGCritic(DICGBase):
         self.residual = residual
 
     def _build_mixer_mlp(self, hidden_sizes):
-        """构建MLP非线性混合器"""
+        """Build the nonlinear mixer MLP."""
         layers = []
-        input_dim = self.n_agents  # 输入是n_agents个个体value
+        input_dim = self.n_agents  # input is the n_agents individual values
 
-        # 构建隐藏层
+        # Build hidden layers
         for i, hidden_size in enumerate(hidden_sizes):
             layers.append(nn.Linear(input_dim, hidden_size))
-            layers.append(nn.ReLU())  # 使用ReLU激活函数
-            # 可选：添加dropout防止过拟合
+            layers.append(nn.ReLU())  # use ReLU activation
+            # Optional: add dropout to prevent overfitting
             input_dim = hidden_size
 
-        # 输出层 - 输出单个全局价值
+        # Output layer - outputs a single global value
         layers.append(nn.Linear(input_dim, 1))
 
         mixer_mlp = nn.Sequential(*layers)
 
-        # 初始化权重
+        # Initialize weights
         for layer in mixer_mlp:
             if isinstance(layer, nn.Linear):
                 nn.init.xavier_uniform_(layer.weight)
                 if layer.bias is not None:
-                    nn.init.constant_(layer.bias, 0.1)  # 小的正偏置
+                    nn.init.constant_(layer.bias, 0.1)  # small positive bias
 
         return mixer_mlp
 

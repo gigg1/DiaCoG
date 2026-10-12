@@ -146,9 +146,9 @@ def run(args):
             baseline.to(device)
 
             device_of_model = next(policy.categorical_output_layer.parameters()).device
-            print(f"模型设备（通过首个参数）: {device_of_model}")
+            print(f"Model device (via first parameter): {device_of_model}")
             device_of_model = next(policy.encoder.parameters()).device
-            print(f"模型设备（通过首个参数）: {device_of_model}")
+            print(f"Model device (via first parameter): {device_of_model}")
 
             # Set max_path_length <= max_steps
             # If max_path_length > max_steps, algo will pad obs

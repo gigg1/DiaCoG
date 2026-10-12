@@ -144,15 +144,15 @@ def cosine_similarity(a, b):
     return dot_product / (norm_a * norm_b)
 
 def aggregate_dict_by_intervals(input_dict):
-    # 创建区间到值的聚合字典
+    # Create a dict that aggregates values into intervals
     dic = {}
     for key, value in input_dict.items():
-        # 计算键所属的区间（0.0-0.1, 0.1-0.2, ..., 0.9-1.0）
+        # Compute the interval the key belongs to (0.0-0.1, 0.1-0.2, ..., 0.9-1.0)
         interval = int(key * 10) / 10 + 0.5
-        # 处理边界情况：当 key=1.0 时
+        # Handle the boundary case: when key=1.0
         if key == 1.0:
-            interval = 0.9 + 0.5  # 归入最后一个区间 [0.9, 1.0]
-        # 将值添加到对应区间
+            interval = 0.9 + 0.5  # put it into the last interval [0.9, 1.0]
+        # Add the value to the corresponding interval
         if interval not in dic.keys():
             dic[interval] =[value]
         else:
@@ -264,10 +264,10 @@ def attn_analysis3(results_folder,exp_folder, args, seeds, de=False):
                     title = str(seed) + "-" + str(i_eps) + "-" + str(i_step)
                     if normalize:
                         sns.heatmap(normalized_attention_weights, annot=True, cmap="crest",
-                                    fmt=".2f")  # annot显示数值，fmt设置数值格式
+                                    fmt=".2f")  # annot shows values; fmt sets the value format
                     else:
                         sns.heatmap(attention_weights, annot=True, cmap="crest",
-                                    fmt=".2f")  # annot显示数值，fmt设置数值格式
+                                    fmt=".2f")  # annot shows values; fmt sets the value format
                     plt.title(title, fontsize=16)
 
                     case_study_dir = os.path.join(results_folder, "case_study/")
@@ -275,7 +275,7 @@ def attn_analysis3(results_folder,exp_folder, args, seeds, de=False):
 
                     plt.savefig(case_study_dir +"m={}_penalty={}_seedEpiStep={}.pdf".format(args.attention_type,
                                                                                     args.penalty, title),
-                                bbox_inches="tight")  # dpi提高清晰度，bbox_inches防止截断
+                                bbox_inches="tight")  # higher dpi for clarity; bbox_inches avoids cropping
                     plt.close()
 
                 obses, _, agent_dones, _ = env.step(actions)

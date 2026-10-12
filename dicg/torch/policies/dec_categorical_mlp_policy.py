@@ -132,15 +132,15 @@ class DecCategoricalMLPPolicy(Policy, CategoricalMLPModule):
 
         """
 
-        # 获取模型所在的设备
+        # Get the device of the model
         device = next(self.parameters()).device
-        # 如果 observations 是列表，先转换为 numpy 数组（优化性能）
+        # If observations is a list, convert to a numpy array first (performance)
         if isinstance(observations, list):
             observations = np.array(observations)
         if isinstance(avail_actions, list):
             avail_actions = np.array(avail_actions)
 
-        # 将输入数据转换为与模型相同设备的张量
+        # Convert inputs to tensors on the same device as the model
         observations_tensor = torch.as_tensor(observations, dtype=torch.float32, device=device)
         avail_actions_tensor = torch.as_tensor(avail_actions, dtype=torch.float32, device=device)
 
@@ -149,10 +149,10 @@ class DecCategoricalMLPPolicy(Policy, CategoricalMLPModule):
 
 
             if not greedy:
-                actions_tensor = dist.sample()  # 在 GPU 上
+                actions_tensor = dist.sample()  # on GPU
                 actions = actions_tensor.cpu().numpy()
             else:
-                probs_tensor = dist.probs  # 在 GPU 上
+                probs_tensor = dist.probs  # on GPU
                 probs_cpu = probs_tensor.cpu().numpy()
                 actions = np.argmax(probs_cpu, axis=-1)
 

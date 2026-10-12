@@ -128,25 +128,25 @@ class PredatorPreyWrapper(PredatorPrey):
     def my_render4(self, i_eps, step_count, attention_weights=None, cell_size=35, is_final=False,
                    save_images=False, output_base_dir="renders", cosine_similarity = None, start_agent = None):
         """
-        增强的渲染函数，支持按episode保存图像
+        Enhanced renderer that supports saving images per episode.
 
-        参数:
-            i_eps: episode编号
-            step_count: 当前步数
-            attention_weights: 注意力权重列表
-            cell_size: 单元格大小
-            is_final: 是否为最终渲染
-            save_images: 是否保存图像
-            output_base_dir: 保存图像的基目录
+        Args:
+            i_eps: episode index
+            step_count: current step number
+            attention_weights: attention weight list
+            cell_size: cell size
+            is_final: whether this is the final render
+            save_images: whether to save images
+            output_base_dir: base directory for saved images
         """
 
-        # 初始化图形系统
+        # Initialize the figure system
 
-        # 创建episode特定目录
+        # Create the episode-specific directory
         if save_images:
-            # 创建基目录
+            # Create the base directory
             os.makedirs(output_base_dir, exist_ok=True)
-            # 创建episode特定目录
+            # Create the episode-specific directory
             episode_dir = os.path.join(output_base_dir, f"episode_{i_eps:03d}")
             os.makedirs(episode_dir, exist_ok=True)
         else:
@@ -156,18 +156,18 @@ class PredatorPreyWrapper(PredatorPrey):
         fig, self._render_ax = plt.subplots(figsize=(10, 10), dpi=100, facecolor='white')
         self._render_ax.set_axis_off()
 
-        # 清除轴内容
+        # Clear the axes content
 
-        # 获取并显示基础渲染
+        # Get and display the base render
         img = Image.fromarray(self.render(mode='rgb_array'))
         self._render_ax.imshow(np.asarray(img))
 
-        # 绘制注意力权重
+        # Draw attention weights
         if attention_weights is not None and start_agent is not None:
             start_col, start_row = self.agent_pos[start_agent]
             start_x, start_y = (start_row + 0.5) * cell_size, (start_col + 0.5) * cell_size
 
-            # 绘制连接线
+            # Draw connection lines
             for i in range(0, self.n_agents):
                 if attention_weights[i] == 0 or start_agent == i:
                     continue
@@ -179,7 +179,7 @@ class PredatorPreyWrapper(PredatorPrey):
                 alpha = min(0.9, 0.3 + 0.7 * attention_weights[i])
                 color = "teal"
 
-                # 绘制线条
+                # Draw the line
                 self._render_ax.plot(
                     [start_x, end_x], [start_y, end_y],
                     color=color,
@@ -194,13 +194,13 @@ class PredatorPreyWrapper(PredatorPrey):
                     ]
                 )
 
-        # 绘制智能体标记
+        # Draw agent markers
         for i in range(self.n_agents):
             col, row = self.agent_pos[i]
             x, y = (row + 0.5) * cell_size, (col + 0.5) * cell_size
 
             if i == start_agent:
-                # 主智能体
+                # Main agent
                 circle = plt.Circle(
                     (x, y), cell_size * 0.35,
                     edgecolor='navy',
@@ -210,7 +210,7 @@ class PredatorPreyWrapper(PredatorPrey):
                 )
                 self._render_ax.add_patch(circle)
 
-                # 光晕效果
+                # Glow effect
                 glow = plt.Circle(
                     (x, y), cell_size * 0.45,
                     edgecolor='none',
@@ -219,7 +219,7 @@ class PredatorPreyWrapper(PredatorPrey):
                 )
                 self._render_ax.add_patch(glow)
             else:
-                # 其他智能体
+                # Other agents
                 circle = plt.Circle(
                     (x, y), cell_size * 0.35,
                     edgecolor='white',
@@ -253,7 +253,7 @@ class PredatorPreyWrapper(PredatorPrey):
                     bbox=dict(facecolor='black', alpha=0.5, boxstyle='round,pad=0.2')
                 )
 
-            # 添加智能体编号
+            # Add the agent index
             self._render_ax.text(
                 x, y + cell_size * 0.035, str(i + 1),
                 color='white',
@@ -263,18 +263,18 @@ class PredatorPreyWrapper(PredatorPrey):
                 fontweight='bold',
             )
 
-        # 更新标题
+        # Update the title
         self._render_ax.set_title(
             f"Episode: {i_eps} - Step: {step_count}",
             fontsize=18,
             color='black'
         )
 
-        # # 动态更新图形
-        # # 保存图像
-        # # 固定帧率控制
+        # # Update the figure dynamically
+        # # Save the image
+        # # Fixed frame-rate control
 
-        # 保存图像
+        # Save the image
         if save_images and episode_dir:
             if start_agent is not None:
                 filename = f"ep_{i_eps:03d}_step_{step_count:03d}_starta_{start_agent + 1:01d}.pdf"
@@ -288,62 +288,62 @@ class PredatorPreyWrapper(PredatorPrey):
                 pad_inches=0.1,
                 facecolor=fig.get_facecolor()
             )
-            print(f"已保存: {filepath}")
+            print(f"Saved: {filepath}")
 
-        # 关闭图形释放内存
+        # Close the figure to release memory
         plt.close(fig)
 
     def my_render_continueGame(self, i_eps, step_count, cell_size=35):
-        # 获取基础渲染
+        # Get the base render
         img = Image.fromarray(self.render(mode='rgb_array'))
         img = np.asarray(img)
 
         import matplotlib.pyplot as plt
 
-        # 检查是否已经创建了图形，如果没有则创建
+        # Check whether the figure has already been created; if not, create it
         if not hasattr(self, 'fig') or not plt.fignum_exists(self.fig.number):
             self.fig = plt.figure(figsize=(8, 8), dpi=100)
             self.ax = self.fig.add_subplot(111)
-            plt.ion()  # 开启交互模式
+            plt.ion()  # enable interactive mode
         else:
-            # 清除之前的内容
+            # Clear the previous content
             self.ax.clear()
 
         self.ax.set_axis_off()
-        # 显示基础环境
+        # Show the base environment
         self.ax.imshow(img)
 
-        # 绘制智能体
+        # Draw agents
         for i in range(self.n_agents):
             col, row = self.agent_pos[i]
             x, y = (row + 0.5) * cell_size, (col + 0.5) * cell_size
-            # 其他智能体
+            # Other agents
             circle = plt.Circle((x, y), cell_size * 0.25,
                                     edgecolor='blue',
                                     facecolor='blue',
                                     linewidth=2,
                                     alpha=0.8)
             self.ax.add_patch(circle)
-            # 添加标签
+            # Add the label
             self.ax.text(x, y, f'A{i}',
                              color='white',
                              fontsize=8,
                              ha='center',
                              va='center')
 
-        # 添加标题显示当前step
+        # Add a title showing the current step
         step_num = step_count
         episode_num = i_eps
         self.ax.set_title(f"Episode {episode_num}, Step {step_num}", fontsize=16)
 
-        # 更新图形
+        # Update the figure
         self.fig.canvas.draw()
         self.fig.canvas.flush_events()
 
-        # 短暂暂停，让画面更新
+        # Brief pause to let the figure refresh
         plt.pause(0.001)
 
-        # 返回viewer状态
+        # Return the viewer status
         if hasattr(self, 'viewer') and self.viewer is not None:
             return self.viewer.isopen
         else:
