@@ -1,4 +1,3 @@
-
 import akro
 import torch
 from torch import nn
@@ -46,6 +45,11 @@ class DICGBase(nn.Module):
 
         self.attention_type = attention_type
 
+        if attention_type not in ('general', 'polarized3'):
+            raise ValueError(
+                "Unsupported attention_type '{}'. DICGBase supports 'general' and "
+                "'polarized3'.".format(attention_type))
+
         if state_include_actions:
             self._dec_obs_dim += self._action_dim
 
@@ -57,7 +61,7 @@ class DICGBase(nn.Module):
         self.layers.append(self.encoder)
 
         # original approach, not the polarized approaches
-        if self.attention_type not in ['polarized1','polarized2','polarized3','polarized4']:
+        if self.attention_type != 'polarized3':
             self.attention_layer = AttentionModule(dimensions=self._embedding_dim,
                                                    attention_type=attention_type)
             self.layers.append(self.attention_layer)
@@ -74,56 +78,7 @@ class DICGBase(nn.Module):
         self.if_gcn_activate = True
 
 
-        if self.attention_type == 'polarized1':
-            self.feature_encode_2 = nn.Linear(self._embedding_dim, self._embedding_dim, bias=False)
-            self.layers.append(self.feature_encode_2)
-
-            self.attention_layer = AttentionModule(dimensions=self._embedding_dim,
-                                                   attention_type=attention_type)
-            self.layers.append(self.attention_layer)
-
-            if self.gnn_type == "GCN":
-                self.gcn_layers = [
-                    GraphConvolutionModule2(num_features=self._embedding_dim,
-                                            id=i,
-                                            activate=self.if_gcn_activate) for i in range(self.n_gcn_layers)
-                ]
-                self.layers.extend(self.gcn_layers)
-
-            if self.gnn_type == "APPNP":
-                self.gcn_layers = [
-                    GraphAPPNP(num_features=self._embedding_dim,
-                                            id=i) for i in range(self.n_gcn_layers)
-                ]
-                self.layers.extend(self.gcn_layers)
-
-        if self.attention_type == 'polarized2':
-
-            self.feature_encode_2_layers = [
-                nn.Linear(self._embedding_dim, self._embedding_dim, bias=False) for i in range(self.n_gcn_layers)
-            ]
-            self.layers.extend(self.feature_encode_2_layers)
-
-            self.attention_layer = AttentionModule(dimensions=self._embedding_dim,
-                                                   attention_type=attention_type)
-            self.layers.append(self.attention_layer)
-
-            if self.gnn_type == "GCN":
-                self.gcn_layers = [
-                    GraphConvolutionModule2(num_features=self._embedding_dim,
-                                            id=i,
-                                            activate=self.if_gcn_activate) for i in range(self.n_gcn_layers)
-                ]
-                self.layers.extend(self.gcn_layers)
-
-            if self.gnn_type == "APPNP":
-                self.gcn_layers = [
-                    GraphAPPNP(num_features=self._embedding_dim,
-                                            id=i) for i in range(self.n_gcn_layers)
-                ]
-                self.layers.extend(self.gcn_layers)
-
-        if self.attention_type in ['polarized3', 'polarized4']:
+        if self.attention_type == 'polarized3':
             # set the dimension of position matrix
             self.if_SVD = 0
             if self.if_SVD == 0:
@@ -147,44 +102,6 @@ class DICGBase(nn.Module):
                                                    attention_type=attention_type,
                                                    position_dimensions=self.position_dimensions)
             self.layers.append(self.attention_layer)
-            if self.gnn_type == "GCN":
-                self.gcn_layers = [
-                    GraphConvolutionModule2(num_features=self._embedding_dim,
-                                            id=i,
-                                            activate=self.if_gcn_activate) for i in range(self.n_gcn_layers)
-                ]
-                self.layers.extend(self.gcn_layers)
-
-            if self.gnn_type == "APPNP":
-                self.gcn_layers = [
-                    GraphAPPNP(num_features=self._embedding_dim,
-                               id=i) for i in range(self.n_gcn_layers)
-                ]
-                self.layers.extend(self.gcn_layers)
-
-        if self.attention_type == 'polarized4':
-            # calculate the matrix for position matrix
-            self.attention_layer_for_position = AttentionModule(dimensions=self._embedding_dim,
-                                                                attention_type='general')
-            self.layers.append(self.attention_layer_for_position)
-
-            # update position matrix at each convolution process
-
-            self.feature_encode_2_layers = [
-                nn.Linear(self._embedding_dim, self._embedding_dim, bias=False) for i in range(self.n_gcn_layers)
-            ]
-            self.layers.extend(self.feature_encode_2_layers)
-            self.position_encode_2_layers = [
-                nn.Linear(self.position_dimensions, self.position_dimensions, bias=False) for i in range(self.n_gcn_layers)
-            ]
-            self.layers.extend(self.position_encode_2_layers)
-
-            # layer for calculating the polarized matrix
-            self.attention_layer = AttentionModule(dimensions=self._embedding_dim,
-                                                   attention_type=attention_type,
-                                                   position_dimensions=self.position_dimensions)
-            self.layers.append(self.attention_layer)
-
             if self.gnn_type == "GCN":
                 self.gcn_layers = [
                     GraphConvolutionModule2(num_features=self._embedding_dim,
@@ -224,7 +141,7 @@ class DICGBase(nn.Module):
                 embeddings_collection.append(embeddings_gcn)
 
         # calculate position matrix
-        if self.attention_type in ['polarized3', 'polarized4']:
+        if self.attention_type == 'polarized3':
             # position_matrix is None
             similarity_matrix = self.attention_layer_for_position.forward(embeddings_0)
 
@@ -271,35 +188,7 @@ class DICGBase(nn.Module):
                 # not do SVD, the position matrix is n*n sparse matrix
                 position_matrix = similarity_matrix[..., :self.position_dimensions]
 
-        if self.attention_type == 'polarized1':
-            embeddings = self.feature_encode_2.forward(embeddings_0)
-            embeddings_collection[0] = embeddings
-
-            # not add position_matrix
-            attention_weights = self.attention_layer.forward(embeddings)
-
-            for i_layer, gcn_layer in enumerate(self.gcn_layers):
-                # (n_paths, max_path_length, n_agents, emb_feat_dim)
-                if self.gnn_type == "GCN":
-                    embeddings_gcn = gcn_layer.forward(embeddings_collection[i_layer], attention_weights)
-                if self.gnn_type == "APPNP":
-                    embeddings_gcn = gcn_layer.forward(embeddings_collection[i_layer], attention_weights,
-                                                       embeddings_collection[0])
-                embeddings_collection.append(embeddings_gcn)
-
-        if self.attention_type == 'polarized2':
-            for i_layer, gcn_layer in enumerate(self.gcn_layers):
-                embeddings = self.feature_encode_2_layers[i_layer].forward(embeddings_collection[i_layer])
-                attention_weights = self.attention_layer.forward(embeddings)
-                if self.gnn_type == "GCN":
-                    embeddings_gcn = gcn_layer.forward(embeddings, attention_weights)
-                if self.gnn_type == "APPNP":
-                    if i_layer == 0:
-                        embeddings_collection[i_layer] = embeddings
-                    embeddings_gcn = gcn_layer.forward(embeddings, attention_weights, embeddings_collection[0])
-                embeddings_collection.append(embeddings_gcn)
-
-        if self.attention_type == 'polarized3':
+                
             embeddings = self.feature_encode_2.forward(embeddings_0)
             embeddings_collection[0] = embeddings
             position_matrix = self.position_encode_2.forward(position_matrix)
@@ -311,19 +200,6 @@ class DICGBase(nn.Module):
                 if self.gnn_type == "APPNP":
                     embeddings_gcn = gcn_layer.forward(embeddings_collection[i_layer], attention_weights,
                                                        embeddings_collection[0])
-                embeddings_collection.append(embeddings_gcn)
-
-        if self.attention_type == 'polarized4':
-            for i_layer, gcn_layer in enumerate(self.gcn_layers):
-                embeddings = self.feature_encode_2_layers[i_layer].forward(embeddings_collection[i_layer])
-                position_matrix = self.position_encode_2_layers[i_layer].forward(position_matrix)
-                attention_weights = self.attention_layer.forward(embeddings, position_matrix)
-                if self.gnn_type == "GCN":
-                    embeddings_gcn = gcn_layer.forward(embeddings, attention_weights)
-                if self.gnn_type == "APPNP":
-                    if i_layer == 0:
-                        embeddings_collection[i_layer] = embeddings
-                    embeddings_gcn = gcn_layer.forward(embeddings, attention_weights, embeddings_collection[0])
                 embeddings_collection.append(embeddings_gcn)
 
         return embeddings_collection, attention_weights
