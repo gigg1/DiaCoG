@@ -171,6 +171,7 @@ Experiment directories are named after the hyperparameters used to launch them, 
 ## Acknowledgements
 
 This codebase reuses infrastructure from
-[parachutel/DICG](https://github.com/parachutel/DICG) (MIT), which in turn
-vendors a fork of [garage](https://github.com/rlworkgroup/garage) (MIT) and adapts the multi-agent environments from
-[ma-gym](https://github.com/koulanurag/ma-gym) (MIT). We thank the authors of these projects. The `DICG-CE` / `DICG-DE` baselines, including the original attention module, are due to Li et al. Our contributions are the DiaCoG framework — modeling implicit coordination from both consistency and discrepancy information at the observation level — the two DiaCoG variants and their theoretical and empirical analyses.
+[parachutel/DICG](https://github.com/parachutel/DICG), which in turn vendors a
+fork of [garage](https://github.com/rlworkgroup/garage) (MIT) and adapts the
+multi-agent environments from
+[ma-gym](https://github.com/koulanurag/ma-gym) (its LICENSE file is Apache-2.0). We thank the authors of these projects.

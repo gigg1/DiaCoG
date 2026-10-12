@@ -6,7 +6,7 @@ with open('README.md') as f:
     
 setup(
     name='DiaCoG',
-    version='1.0.0',
+    version='0.1.0',
     packages=find_packages(),
     python_requires='>=3.7',
     install_requires=[],

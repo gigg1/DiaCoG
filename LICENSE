@@ -22,20 +22,19 @@ SOFTWARE.
 
 ----------------------------------------------------------------------------
 
-This project builds upon and redistributes code from the following
-open-source projects, all under the MIT License:
+Third-party code
+
+This repository vendors code from the following open-source projects:
 
 - Deep Implicit Coordination Graphs (DICG)
-  Copyright (c) 2020 Sheng Li, Jayesh K. Gupta, Peter Morales, Ray Allen,
-  Mykel J. Kochenderfer
   https://github.com/sisl/DICG
+  Upstream ships no LICENSE file; its setup.py declares `license='MIT'`.
 
 - garage
-  Copyright (c) 2019 The garage contributors
   https://github.com/rlworkgroup/garage
+  MIT License, Copyright (c) 2019 Reinforcement Learning Working Group.
 
 - Multi-Agent Gym (ma-gym)
-  Copyright (c) 2019 Anurag Koul
   https://github.com/koulanurag/ma-gym
-
-Their original copyright notices and license terms are retained in full.
+  Its LICENSE file is Apache License 2.0, while its setup.py declares
+  `license='MIT License'`.
