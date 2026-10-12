@@ -109,12 +109,8 @@ class CentralizedCategoricalMLPPolicy(MLPModule):
     def log_likelihood(self, observations, avail_actions_n, actions):
         dists_n = self.forward(observations, avail_actions_n)
         llhs = dists_n.log_prob(actions)
-        # llhs.shape = (n_paths, max_path_length, n_agents)
         # For n agents action probability can be treated as independent
-        # Pa = prob_i^n Pa_i
-        # log(Pa) = sum_i^n log(Pa_i)
         llhs = llhs.sum(axis=-1) # Asuming independent actions
-        # llhs.shape = (n_paths, max_path_length)
         return llhs
 
     @property

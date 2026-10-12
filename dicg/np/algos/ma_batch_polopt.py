@@ -71,7 +71,6 @@ class MABatchPolopt(RLAlgorithm):
 
         for epoch in runner.step_epochs():
             for _ in range(self.n_samples):
-                # self.n_samples = 1
                 runner.step_path = runner.obtain_samples(runner.step_itr)
                 tabular.record('TotalEnvSteps', runner.total_env_steps)
                 last_return = self.train_once(runner.step_itr,

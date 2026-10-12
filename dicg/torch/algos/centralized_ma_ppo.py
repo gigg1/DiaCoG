@@ -88,7 +88,6 @@ class CentralizedMAPPO(MABatchPolopt):
         self._entropy_method = entropy_method
         self._lr_clip_range = lr_clip_range
         self._eps = 1e-8
-        # self.device = policy.device
         self.device = device
         print ("-------mappo self.device:", self.device)
 
@@ -158,17 +157,7 @@ class CentralizedMAPPO(MABatchPolopt):
         obs, avail_actions, actions, rewards, valids, baselines, returns = \
             self.process_samples(itr, paths)
 
-        # print("------------------------")
-        # print("obs.shape", obs.shape)
-        # print("avail_actions.shape", avail_actions.shape)
-        # print("actions.shape", actions.shape)
-        # print("rewards.shape", rewards.shape)
-        # print("baselines.shape", baselines.shape)
-        # print("returns.shape", returns.shape)
 
-        # print('processed obs.shape =', obs.shape)
-        # print('processed avail_actions.shape=', avail_actions.shape)
-        # print(avail_actions)
 
         with torch.no_grad():
             loss_before = self._compute_loss(itr, obs, avail_actions, actions, 
@@ -181,11 +170,8 @@ class CentralizedMAPPO(MABatchPolopt):
         grad_norm = []
         step_size = int(np.ceil(len(rewards) / self._optimization_n_minibatches))
 
-        # step_size = int(self._minibatch_size / self.policy._n_agents) \
-        #     if self._minibatch_size else len(rewards)
 
         shuffled_ids = np.random.permutation(len(rewards))
-        # shuffled_ids = np.array(range(len(rewards)))
         print('MultiAgentNumTrajs =', len(rewards))
 
         for mini_epoch in range(self._optimization_mini_epochs):
@@ -289,18 +275,12 @@ class CentralizedMAPPO(MABatchPolopt):
                                         self.max_path_length, baselines,
                                         rewards)
 
-        # print("--------")
-        # print("advantages shape:", advantages.shape)
 
         if self._center_adv:
             means, variances = list(
                 zip(*[(valid_adv.mean(), valid_adv.var(unbiased=False))
                       for valid_adv in filter_valids(advantages, valids)]))
 
-            # advantages = F.batch_norm(advantages.t(),
-            #                           torch.Tensor(means),
-            #                           torch.Tensor(variances),
-            #                           eps=self._eps).t()
             advantages = F.batch_norm(advantages.t(),
                                       torch.tensor(means, device=self.device),
                                       torch.tensor(variances, device=self.device),
@@ -441,11 +421,9 @@ class CentralizedMAPPO(MABatchPolopt):
 
         """
         if hasattr(self.baseline, 'predict_n'):
-            # return torch.Tensor(self.baseline.predict_n(path))
             return torch.as_tensor(self.baseline.predict_n(path),
                                    dtype=torch.float32,
                                    device=self.device)
-        # return torch.Tensor(self.baseline.predict(path))
         return torch.as_tensor(self.baseline.predict(path),
                                dtype=torch.float32,
                                device=self.device)

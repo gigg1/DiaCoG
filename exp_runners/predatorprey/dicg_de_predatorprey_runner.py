@@ -127,10 +127,6 @@ def run(args):
                 name='dec_categorical_mlp_policy'
             )
 
-            # print("env.spec.obs_space.shape:", env.spec.observation_space.shape)
-            # print("env.spec.obs_space.flat_dim:", env.spec.observation_space.flat_dim)
-            # print("env.spec.act_space.shape:", env.spec.action_space.shape)
-            # print("env.spec.act_space.flat_dim:", env.spec.action_space.flat_dim)
 
             baseline = DICGCritic(
                 env.spec,
@@ -149,7 +145,6 @@ def run(args):
             
             # Set max_path_length <= max_steps
             # If max_path_length > max_steps, algo will pad obs
-            # obs.shape = torch.Size([n_paths, algo.max_path_length, feat_dim])
             algo = CentralizedMAPPO(
                 env_spec=env.spec,
                 policy=policy,
@@ -221,7 +216,6 @@ if __name__ == '__main__':
     parser.add_argument('--capture_reward', type=float, default=10)
     parser.add_argument('--agent_visible', type=int, default=1)
     # Algo
-    # parser.add_argument('--max_algo_path_length', type=int, default=n_steps)
     parser.add_argument('--hidden_nonlinearity', type=str, default='tanh')
     parser.add_argument('--discount', type=float, default=0.99)
     parser.add_argument('--center_adv', type=int, default=1)

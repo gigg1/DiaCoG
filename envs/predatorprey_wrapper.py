@@ -72,14 +72,10 @@ class PredatorPreyWrapper(PredatorPrey):
 
     def step(self, actions):
         obses, rewards, dones, infos = super().step(actions)
-        # print ("rewards:", rewards)
-        # print(" np.mean(rewards):",  np.mean(rewards))
 
         if not self.centralized:
             return obses, rewards, dones, infos
         else:
-            # print("---------------------")
-            # print("np.concatenate(obses).shape:", np.concatenate(obses).shape)
             return np.concatenate(obses), np.mean(rewards), np.all(dones), infos
 
     def reset(self):
@@ -90,9 +86,6 @@ class PredatorPreyWrapper(PredatorPrey):
             return np.concatenate(obses)
 
     # def eval(self, policy, n_episodes=20, greedy=True, load_from_file=False,
-    #          render=False):
-    #     standard_eval(self, policy, n_episodes=n_episodes, greedy=greedy,
-    #         load_from_file=load_from_file, render=render)
 
     def eval(self, policy, n_episodes=20, greedy=True, load_from_file=False,
              render=False):
@@ -148,8 +141,6 @@ class PredatorPreyWrapper(PredatorPrey):
         """
 
         # 初始化图形系统
-        # if not hasattr(self, '_render_fig'):
-        #     self._init_render_system()
 
         # 创建episode特定目录
         if save_images:
@@ -166,13 +157,10 @@ class PredatorPreyWrapper(PredatorPrey):
         self._render_ax.set_axis_off()
 
         # 清除轴内容
-        # self._render_ax.clear()
-        # self._render_ax.set_axis_off()
 
         # 获取并显示基础渲染
         img = Image.fromarray(self.render(mode='rgb_array'))
         self._render_ax.imshow(np.asarray(img))
-        # ax.imshow(np.asarray(img))
 
         # 绘制注意力权重
         if attention_weights is not None and start_agent is not None:
@@ -187,14 +175,12 @@ class PredatorPreyWrapper(PredatorPrey):
                 end_col, end_row = self.agent_pos[i]
                 end_x, end_y = (end_row + 0.5) * cell_size, (end_col + 0.5) * cell_size
 
-                # line_width = max(1, 10 * attention_weights[i])
                 line_width = max(1, 20 * attention_weights[i])
                 alpha = min(0.9, 0.3 + 0.7 * attention_weights[i])
                 color = "teal"
 
                 # 绘制线条
                 self._render_ax.plot(
-                # ax.plot(
                     [start_x, end_x], [start_y, end_y],
                     color=color,
                     linewidth=line_width,
@@ -245,7 +231,6 @@ class PredatorPreyWrapper(PredatorPrey):
 
             if attention_weights is not None:
                 weight = attention_weights[i]
-                # if weight > 0.1:
                 self._render_ax.text(
                     x, y - cell_size * 0.3, f"w:{weight:.2f}",
                     color='white',
@@ -286,18 +271,8 @@ class PredatorPreyWrapper(PredatorPrey):
         )
 
         # # 动态更新图形
-        # self._render_fig.canvas.draw_idle()
-        # self._render_fig.canvas.flush_events()
-        #
         # # 保存图像
-        # if save_images and episode_dir:
-        #     self._save_render_frame(i_eps, step_count, episode_dir, start_agent)
-        #
         # # 固定帧率控制
-        # # plt.pause(0.08)
-        # plt.pause(0.01)
-        #
-        # return plt.fignum_exists(self._render_fig.number)
 
         # 保存图像
         if save_images and episode_dir:

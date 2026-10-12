@@ -163,7 +163,6 @@ class TrafficJunctionWrapper(TrafficJunctionEnv):
             episode_rewards.append(0)
             while not terminated:
                 if not self.centralized:
-                    # obs.shape = (n_agents, n_envs, obs_dim)
                     obs = torch.Tensor(obs).unsqueeze(1) # add n_envs dim
                     avail_actions = torch.Tensor(self.get_avail_actions()).unsqueeze(1)
                     actions, agent_infos = policy.get_actions(obs, 
@@ -175,7 +174,6 @@ class TrafficJunctionWrapper(TrafficJunctionEnv):
                     obs, reward, terminated, info = self.step(actions) # n_env = 1
                     terminated = all(terminated) 
                 else:
-                    # obs.shape = (n_envs, n_agents * obs_dim)
                     obs = np.array([obs])
                     avail_actions = np.array([self.get_avail_actions()])
                     actions, agent_infos = policy.get_actions(obs, 
@@ -198,7 +196,6 @@ class TrafficJunctionWrapper(TrafficJunctionEnv):
             tabular.record('EvalAvgReturn', avg_return)
             tabular.record('EvalSucessRate', success)
 
-        # return eval metric
         return success
 
     def seed(self, n):
@@ -214,7 +211,6 @@ if __name__ == '__main__':
     print('single agent action_space:', env.action_space)
     print('all agent observation_space:', env.observation_space)
     obs = env.reset()
-    # print('all agent obs:', obs)
     print('flat full obs len:', len(obs))
 
     for t in range(env.max_steps):

@@ -42,19 +42,7 @@ class DICGCECategoricalMLPPolicy(DICGBase):
         self.layers.append(self.categorical_output_layer)
 
     def get_embeddings(self, obs_n):
-        # obs_n = np.array(obs_n)
-        # obs_n = torch.Tensor(obs_n)
-        # obs_n = obs_n.reshape(obs_n.shape[:-1] + (self._n_agents, -1))
-        # with torch.no_grad():
-        #     embeddings_collection, attention_weights = super().forward(obs_n)
-        #
         # # (n_paths, max_path_length, n_agents, action_space_dim)
-        # # or (n_agents, action_space_dim)
-        # if not self.residual:
-        #     embeddings = embeddings_collection[-1]
-        # else:
-        #     embeddings = embeddings_collection[0] + embeddings_collection[-1]
-        # return embeddings
 
         device = next(self.parameters()).device
         if not isinstance(obs_n, torch.Tensor):
@@ -96,28 +84,9 @@ class DICGCECategoricalMLPPolicy(DICGBase):
         return obs_n
 
     # def get_encoder_embedding(self, obs_n):
-    #     with torch.no_grad():
-    #         obs_n = np.array(obs_n)
-    #         obs_n = torch.Tensor(obs_n)
-    #         obs_n = obs_n.reshape(obs_n.shape[:-1] + (self._n_agents, -1))
-    #         # print(obs_n.shape)
-    #         embeddings_collection, attention_weights = super().forward(obs_n)
-    #         return embeddings_collection[0]
 
     def forward(self, obs_n, avail_actions_n):
 
-        # if isinstance(obs_n, list):
-        #     obs_n = np.array(obs_n)
-        #
-        # obs_n = obs_n.reshape(obs_n.shape[:-1] + (self._n_agents, -1))
-        # obs_n = torch.Tensor(obs_n)
-        # avail_actions_n = torch.Tensor(avail_actions_n.reshape(
-        #     avail_actions_n.shape[:-1] + (self._n_agents, -1)))
-        #
-        # device = obs_n.device
-        # obs_n = obs_n.to(device)
-        # avail_actions_n =  avail_actions_n.to(device)
-        # embeddings_collection, attention_weights = super().forward(obs_n)
 
         device = next(self.parameters()).device
         if not isinstance(obs_n, torch.Tensor):
@@ -136,14 +105,11 @@ class DICGCECategoricalMLPPolicy(DICGBase):
         embeddings_collection, attention_weights = super().forward(obs_n)
 
         # (n_paths, max_path_length, n_agents, action_space_dim)
-        # or (n_agents, action_space_dim)
         if not self.residual:
             dists_n = \
                 self.categorical_output_layer.forward(embeddings_collection[-1])
         else:
             embeddings_add = embeddings_collection[0] + embeddings_collection[-1]
-            # print ("embeddings_add.shape:\n", embeddings_add.shape)
-            # print ("embeddings_add:\n",embeddings_add)
 
             dists_n = self.categorical_output_layer.forward(embeddings_add)
 
@@ -152,10 +118,8 @@ class DICGCECategoricalMLPPolicy(DICGBase):
         masked_probs = masked_probs / masked_probs.sum(dim=-1, keepdim=True) # renormalize
         masked_dists_n = Categorical(probs=masked_probs) # redefine distribution
 
-        # masked_probs = dists_n.probs.clone()
         # masked_probs *= torch.Tensor(avail_actions_n) # mask
         # masked_probs /= masked_probs.sum(axis=-1, keepdims=True) # renormalize
-        # masked_dists_n = Categorical(probs=masked_probs) # redefine distribution
 
         return masked_dists_n, attention_weights
 
@@ -167,30 +131,18 @@ class DICGCECategoricalMLPPolicy(DICGBase):
             E.g. 3 agents: [o1, o2, o3]
 
         """
-        # if isinstance(obs_n, list):
-        #     obs_n = np.array(obs_n)
-        # if isinstance(avail_actions_n, list):
-        #     avail_actions_n = np.array(avail_actions_n)
 
-        # device = next(self.parameters()).device  # 获取模型所在的设备
-        # obs_n = obs_n.to(device)
-        # avail_actions_n = avail_actions_n.to(device)  # 确保avail_actions也在同一设备
 
         with torch.no_grad():
             dists_n, attention_weights = self.forward(obs_n, avail_actions_n)
-            # dists_n = dists_n.cpu()
             attention_weights = attention_weights.cpu()
 
             if not greedy:
-                # actions_n = dists_n.sample().numpy()
                 actions_n = dists_n.sample().cpu().numpy()
             else:
-                # actions_n = np.argmax(dists_n.probs.numpy(), axis=-1)
                 actions_n = np.argmax(dists_n.probs.cpu().numpy(), axis=-1)
 
             agent_infos_n = {}
-            # agent_infos_n['action_probs'] = [dists_n.probs[i].numpy()
-            #     for i in range(len(actions_n))]
             agent_infos_n['action_probs'] = [dists_n.probs[i].cpu().numpy()
                                              for i in range(len(actions_n))]
             agent_infos_n['attention_weights'] = [attention_weights.numpy()[i, :]
@@ -199,25 +151,16 @@ class DICGCECategoricalMLPPolicy(DICGBase):
             return actions_n, agent_infos_n
 
     def entropy(self, observations, avail_actions):
-        # print('obs.shape =', observations.shape)
         dists_n, _ = self.forward(observations, avail_actions)
-        # print('dist =', dists_n)
-        # print('dist.probs =', dists_n.probs)
         entropy = dists_n.entropy()
-        # print('entropy.shapeBefore =', entropy.shape)
         entropy = entropy.mean(axis=-1) # Asuming independent actions
-        # print('entropy.shapeAfter =', entropy.shape)
         return entropy
 
     def log_likelihood(self, observations, avail_actions, actions):
         dists_n, _ = self.forward(observations, avail_actions)
         llhs = dists_n.log_prob(actions)
-        # llhs.shape = (n_paths, max_path_length, n_agents)
         # For n agents action probability can be treated as independent
-        # Pa = prob_i^n Pa_i
-        # log(Pa) = sum_i^n log(Pa_i)
         llhs = llhs.sum(axis=-1) # Asuming independent actions
-        # llhs.shape = (n_paths, max_path_length)
         return llhs
 
     @property

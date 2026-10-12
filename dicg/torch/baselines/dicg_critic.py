@@ -38,7 +38,6 @@ class DICGCritic(DICGBase):
         )
 
         self.aggregator_type = aggregator_type
-        # self.mixing_type = mixing_type
         self.n_agents = n_agents
 
         if aggregator_type == 'sum':
@@ -71,7 +70,6 @@ class DICGCritic(DICGBase):
             layers.append(nn.Linear(input_dim, hidden_size))
             layers.append(nn.ReLU())  # 使用ReLU激活函数
             # 可选：添加dropout防止过拟合
-            # layers.append(nn.Dropout(0.1))
             input_dim = hidden_size
 
         # 输出层 - 输出单个全局价值

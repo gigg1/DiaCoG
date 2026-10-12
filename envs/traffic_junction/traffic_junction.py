@@ -32,7 +32,6 @@ def nPr(n,r):
     return f(n)//f(n-r)
 
 class TrafficJunctionEnv(gym.Env):
-    # metadata = {'render.modes': ['human']}
 
     def __init__(self,):
         self.__version__ = "0.0.1"
@@ -177,9 +176,7 @@ class TrafficJunctionEnv(gym.Env):
         # when dead => no route, must be masked by trainer.
         self.route_id = [-1] * self.ncar
 
-        # self.cars = np.zeros(self.ncar)
         # Current car to enter system
-        # self.car_i = 0
         # Ids i.e. indexes
         self.car_ids = np.arange(self.CAR_CLASS,self.CAR_CLASS + self.ncar)
 
@@ -254,7 +251,6 @@ class TrafficJunctionEnv(gym.Env):
     def render(self, mode='human', close=False):
 
         grid = self.grid.copy().astype(object)
-        # grid = np.zeros(self.dims[0]*self.dims[1], dtypeobject).reshape(self.dims)
         grid[grid != self.OUTSIDE_CLASS] = '_'
         grid[grid == self.OUTSIDE_CLASS] = ''
         self.stdscr.clear()

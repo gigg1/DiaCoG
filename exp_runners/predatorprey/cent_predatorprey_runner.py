@@ -94,7 +94,6 @@ def run(args):
                 eval_epoch_freq=args.eval_epoch_freq,
                 save_env=env.pickleable
             )
-            # logdir = runner._snapshotter._snapshot_dir
 
             hidden_nonlinearity = F.relu if args.hidden_nonlinearity == 'relu' \
                                     else torch.tanh
@@ -111,7 +110,6 @@ def run(args):
             
             # Set max_path_length <= max_steps
             # If max_path_length > max_steps, algo will pad obs
-            # obs.shape = torch.Size([n_paths, algo.max_path_length, feat_dim])
             algo = CentralizedMAPPO(
                 env_spec=env.spec,
                 policy=policy,
@@ -168,28 +166,19 @@ if __name__ == '__main__':
     parser.add_argument('--run_id', type=int, default=0) # sequential naming
     parser.add_argument('--n_eval_episodes', type=int, default=100)
     parser.add_argument('--render', type=int, default=1)
-    # parser.add_argument('--eval_during_training', type=int, default=1)
     parser.add_argument('--eval_during_training', type=int, default=1)
     parser.add_argument('--eval_greedy', type=int, default=1)
-    # parser.add_argument('--eval_epoch_freq', type=int, default=20)
     parser.add_argument('--eval_epoch_freq', type=int, default=5)
     # Env
-    # parser.add_argument('--max_env_steps', type=int, default=128)
     parser.add_argument('--max_env_steps', type=int, default=200)
-    # parser.add_argument('--grid_size', type=int, default=5)
     parser.add_argument('--grid_size', type=int, default=10)
-    # parser.add_argument('--n_agents', '-n', type=int, default=2)
     parser.add_argument('--n_agents', '-n', type=int, default=8)
-    # parser.add_argument('--n_preys', type=int, default=1)
     parser.add_argument('--n_preys', type=int, default=8)
-    # parser.add_argument('--step_cost', type=float, default=-0.01)
     parser.add_argument('--step_cost', type=float, default=-0.1)
     parser.add_argument('--penalty', type=float, default=-0.5)
     parser.add_argument('--capture_reward', type=float, default=10)
-    # parser.add_argument('--agent_visible', type=int, default=0)
     parser.add_argument('--agent_visible', type=int, default=1)
     # Algo
-    # parser.add_argument('--max_algo_path_length', type=int, default=n_steps)
     parser.add_argument('--hidden_nonlinearity', type=str, default='tanh')
     parser.add_argument('--discount', type=float, default=0.99)
     parser.add_argument('--center_adv', type=int, default=1)

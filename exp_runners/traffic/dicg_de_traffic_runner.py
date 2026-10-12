@@ -150,7 +150,6 @@ def run(args):
 
             # Set max_path_length <= max_steps
             # If max_path_length > max_steps, algo will pad obs
-            # obs.shape = torch.Size([n_paths, algo.max_path_length, feat_dim])
             algo = CentralizedMAPPO(
                 env_spec=env.spec,
                 policy=policy,
@@ -221,7 +220,6 @@ if __name__ == '__main__':
     parser.add_argument('--add_rate_min', type=float, default=0.1)
     parser.add_argument('--curriculum', type=int, default=0)
     # Algo
-    # parser.add_argument('--max_algo_path_length', type=int, default=n_steps)
     parser.add_argument('--hidden_nonlinearity', type=str, default='tanh')
     parser.add_argument('--discount', type=float, default=0.99)
     parser.add_argument('--center_adv', type=int, default=1)

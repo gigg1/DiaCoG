@@ -5,7 +5,6 @@ import numpy as np
 
 from torch.distributions import Categorical
 from garage.torch.policies import Policy
-# from garage.torch.modules.mlp_module import MLPModule
 
 from .mlp_encoder_module import MLPEncoderModule
 from .gaussian_mlp_module import GaussianMLPModule
@@ -71,11 +70,9 @@ class AttentionMLP(nn.Module):
 
     def forward(self, obs_n):
         # (n_paths, max_path_length, n_agents, emb_feat_dim)
-        # or (n_agents, emb_feat_dim)
         embeddings = self.encoder.forward(obs_n)
 
         # (n_paths, max_path_length, n_agents, n_agents)
-        # or (n_agents, n_agents)
         attention_weights = self.self_attention.forward(embeddings)
 
         embeddings_concat = torch.cat((embeddings, attention_weights), dim=-1)

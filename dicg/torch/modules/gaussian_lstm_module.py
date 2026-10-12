@@ -181,8 +181,6 @@ class GaussianLSTMModule(nn.Module):
             else:
                 std = torch.diag(log_std_uncentered.exp().exp().add(1.).log())
 
-        # dist = Independent(Normal(mean, std), 1) # Independent?
-        # dist = Normal(mean, std)
 
         return mean, std, next_hidden_state, next_cell_state
 

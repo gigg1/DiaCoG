@@ -47,7 +47,6 @@ class CentralizedGaussianMLPPolicy(GaussianMLPModule):
             output_w_init=output_w_init,
             output_b_init=output_b_init,
             learn_std=True,
-            # duplicate_std_copies=self._n_agents,
             share_std=share_std,
             init_std=1.0,
             min_std=1e-6,
@@ -79,7 +78,6 @@ class CentralizedGaussianMLPPolicy(GaussianMLPModule):
             std = std.reshape(std.shape[:-1] + (self._n_agents, -1))
             dist = Independent(Normal(mean, std), 1)
         else:
-            # std = torch.diag(std.diagonal()[:self._single_agent_action_dim])
             dist = MultivariateNormal(mean, std)
 
         return dist
@@ -118,12 +116,8 @@ class CentralizedGaussianMLPPolicy(GaussianMLPModule):
     def log_likelihood(self, observations, avail_actions_n, actions):
         dists_n = self.forward(observations)
         llhs = dists_n.log_prob(actions)
-        # llhs.shape = (n_paths, max_path_length, n_agents)
         # For n agents action probability can be treated as independent
-        # Pa = prob_i^n Pa_i
-        # log(Pa) = sum_i^n log(Pa_i)
         llhs = llhs.sum(axis=-1) # Asuming independent actions
-        # llhs.shape = (n_paths, max_path_length)
         return llhs
 
     @property

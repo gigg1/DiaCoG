@@ -2,7 +2,6 @@
 import torch
 from torch import nn
 
-# from garage.torch.modules import GaussianMLPModule
 from torch.distributions import Normal
 from dicg.torch.modules.gaussian_mlp_module import GaussianMLPModule
 
@@ -34,7 +33,6 @@ class GaussianMLPMixBaseline(nn.Module):
             self.input_dim = int(env_spec.observation_space.flat_dim)
         elif aggregator_type == 'nonl':
             # 新增：非线性混合器MLP
-            # print("env_spec.observation_space.shape:", env_spec.observation_space.shape)
             self.input_dim = int(env_spec.observation_space.flat_dim / self.n_agents)
 
             mixer_hidden_sizes = (64, 32)
@@ -69,7 +67,6 @@ class GaussianMLPMixBaseline(nn.Module):
             layers.append(nn.Linear(input_dim, hidden_size))
             layers.append(nn.ReLU())  # 使用ReLU激活函数
             # 可选：添加dropout防止过拟合
-            # layers.append(nn.Dropout(0.1))
             input_dim = hidden_size
 
         # 输出层 - 输出单个全局价值
@@ -107,10 +104,8 @@ class GaussianMLPMixBaseline(nn.Module):
 
     # pylint: disable=arguments-differ
     def forward(self, obs):
-        # print ("1", obs.shape)
         obs = torch.Tensor(obs)
         emb = obs.reshape(obs.shape[:-1] + (self.n_agents, -1))
-        # print("2", emb.shape)
 
         if self.aggregator_type == 'sum':
             mean, _ = self.baseline_aggregator(emb)
@@ -120,9 +115,7 @@ class GaussianMLPMixBaseline(nn.Module):
             mean, _ = self.baseline_aggregator(emb)
             return mean.squeeze(-1)
         elif self.aggregator_type == 'nonl':
-            # print(self.baseline_aggregator(emb))
             mean, _ = self.baseline_aggregator(emb)
             individual_values = mean.squeeze(-1)  # [batch_size, n_agents]
-            # print ("individual_values.shape:", individual_values.shape)
             return self.value_mixer(individual_values).squeeze(-1)
 

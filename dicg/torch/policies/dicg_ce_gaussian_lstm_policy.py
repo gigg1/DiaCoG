@@ -65,8 +65,6 @@ class DICGCEGaussianLSTMPolicy(DICGBase):
 
         if self.state_include_actions:
             assert actions_n is not None
-            # actions_n = torch.Tensor(actions_n)
-            # actions_n.shape = (n_paths, max_path_len, n_agents, action_dim)
             # Shift and pad actions by one time step
             actions_shifted = actions_n[:, :-1, :, :]
             # Use zeros as _prev_actions in the first time step
@@ -83,14 +81,11 @@ class DICGCEGaussianLSTMPolicy(DICGBase):
         else:
             inputs = embeddings_collection[-1]
 
-        # inputs.shape = (n_paths, max_path_len, n_agents, emb_dim) 
         inputs = inputs.transpose(0, 1)
-        # inputs.shape = (max_path_len, n_paths, n_agents, emb_dim)
         inputs = inputs.reshape(
             max_path_len, n_paths * self._n_agents, self._embedding_dim)
 
         mean, std, _, _ = self.gaussian_lstm_output_layer.forward(inputs)
-        # mean.shape = (max_path_len, n_paths * n_agents, action_dim)
         # Need to reshape back dists_n
         mean = mean.reshape(max_path_len, n_paths, self._n_agents, 
                             self._action_dim).transpose(0, 1)
@@ -123,7 +118,6 @@ class DICGCEGaussianLSTMPolicy(DICGBase):
         else:
             inputs = embeddings_collection[-1]
 
-        # input.shape = (n_envs, n_agents, emb_dim)
         inputs = inputs.reshape(
             1, n_envs * self._n_agents, self._embedding_dim)
 
@@ -168,7 +162,6 @@ class DICGCEGaussianLSTMPolicy(DICGBase):
                 for i in range(len(actions_n))]
 
             if self.state_include_actions:
-                # actions_n.shape = (n_envs, self._n_agents, self._action_dim)
                 self._prev_actions = torch.Tensor(actions_n)
 
             return actions_n, agent_infos_n
@@ -192,12 +185,8 @@ class DICGCEGaussianLSTMPolicy(DICGBase):
         else:
             dists_n, _ = self.forward(observations, avail_actions)
         llhs = dists_n.log_prob(actions)
-        # llhs.shape = (n_paths, max_path_length, n_agents)
         # For n agents action probability can be treated as independent
-        # Pa = prob_i^n Pa_i
-        # log(Pa) = sum_i^n log(Pa_i)
         llhs = llhs.sum(axis=-1) # Asuming independent actions
-        # llhs.shape = (n_paths, max_path_length)
         return llhs
 
     @property

@@ -85,7 +85,6 @@ class DecCategoricalMLPPolicy(Policy, CategoricalMLPModule):
 
     def forward(self, obs, avail_actions):
         obs = obs.reshape(obs.shape[:-1] + (self._n_agents, -1))
-        # print("obs.shape:", obs.shape)
         dist = super().forward(obs)
         # Apply available actions mask
         avail_actions = avail_actions.reshape(
@@ -145,21 +144,9 @@ class DecCategoricalMLPPolicy(Policy, CategoricalMLPModule):
         observations_tensor = torch.as_tensor(observations, dtype=torch.float32, device=device)
         avail_actions_tensor = torch.as_tensor(avail_actions, dtype=torch.float32, device=device)
 
-        # print("observations_tensor.shape:", observations_tensor.shape)
         with torch.no_grad():
-            # obs.shape = (n_agents, n_envs, obs_dim)
-            # dist = self.forward(torch.Tensor(observations), torch.Tensor(avail_actions))
             dist = self.forward(observations_tensor, avail_actions_tensor)
-            # actions = dist.sample().numpy()
-            # if not greedy:
-            #     actions = dist.sample().numpy()
-            # else:
-            #     actions = np.argmax(dist.probs.numpy(), axis=-1)
 
-            # agent_infos = {}
-            # agent_infos['action_probs'] = [dist.probs[i].numpy()
-            #                                for i in range(len(actions))]
-            # return actions, agent_infos
 
             if not greedy:
                 actions_tensor = dist.sample()  # 在 GPU 上
@@ -169,15 +156,12 @@ class DecCategoricalMLPPolicy(Policy, CategoricalMLPModule):
                 probs_cpu = probs_tensor.cpu().numpy()
                 actions = np.argmax(probs_cpu, axis=-1)
 
-            # print("dist.shape:", dist.shape)
-            # print("actions.shape:", actions.shape)
 
             agent_infos = {}
             probs_tensor = dist.probs
             probs_cpu = probs_tensor.cpu().numpy()
             agent_infos['action_probs'] = [probs_cpu[i] for i in range(len(actions))]
 
-            # print ("actions.shape:", actions.shape)
             return actions, agent_infos
 
     def log_likelihood(self, observations, avail_actions, actions):
@@ -194,7 +178,6 @@ class DecCategoricalMLPPolicy(Policy, CategoricalMLPModule):
         """
         dist = self.forward(observations, avail_actions)
         # For n agents, action probabilities are treated as independent
-        # Pa = prob_i^n Pa_i
         # => log(Pa) = sum_i^n log(Pa_i)
         return dist.log_prob(actions).sum(axis=-1)
 

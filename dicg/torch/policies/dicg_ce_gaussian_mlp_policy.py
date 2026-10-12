@@ -52,7 +52,6 @@ class DICGCEGaussianMLPPolicy(DICGBase):
         embeddings_collection, attention_weights = super().forward(obs_n)
 
         # (n_paths, max_path_length, n_agents, action_space_dim)
-        # or (n_agents, action_space_dim)
         if not self.residual:
             mean, std = \
                 self.gaussian_output_layer.forward(embeddings_collection[-1])
@@ -97,12 +96,8 @@ class DICGCEGaussianMLPPolicy(DICGBase):
     def log_likelihood(self, observations, avail_actions, actions):
         dists_n, _ = self.forward(observations)
         llhs = dists_n.log_prob(actions)
-        # llhs.shape = (n_paths, max_path_length, n_agents)
         # For n agents action probability can be treated as independent
-        # Pa = prob_i^n Pa_i
-        # log(Pa) = sum_i^n log(Pa_i)
         llhs = llhs.sum(axis=-1) # Asuming independent actions
-        # llhs.shape = (n_paths, max_path_length)
         return llhs
 
     @property

@@ -60,10 +60,8 @@ class DICGCECategoricalLSTMPolicy(DICGBase):
         if self.state_include_actions:
             assert actions_n is not None
             actions_n = torch.Tensor(actions_n).unsqueeze(-1).type(torch.LongTensor)
-            # actions_n.shape = (n_paths, max_path_len, n_agents, 1)
             # Convert actions_n to one hot encoding
             actions_onehot = torch.zeros(actions_n.shape[:-1] + (self._action_dim,))
-            # actions_onehot.shape = (n_paths, max_path_len, n_agents, action_dim)
             actions_onehot.scatter_(-1, actions_n, 1)
             # Shift and pad actions_onehot by one time step
             actions_onehot_shifted = actions_onehot[:, :-1, :, :]
@@ -86,9 +84,7 @@ class DICGCECategoricalLSTMPolicy(DICGBase):
             inputs = embeddings_collection[-1]
 
         
-        # inputs.shape = (n_paths, max_path_len, n_agents, emb_dim) 
         inputs = inputs.transpose(0, 1)
-        # inputs.shape = (max_path_len, n_paths, n_agents, emb_dim)
         inputs = inputs.reshape(
             max_path_len, n_paths * self._n_agents, self._embedding_dim)
 
@@ -126,7 +122,6 @@ class DICGCECategoricalLSTMPolicy(DICGBase):
         else:
             inputs = embeddings_collection[-1]
 
-        # input.shape = (n_envs, n_agents, emb_dim)
         inputs = inputs.reshape(
             1, n_envs * self._n_agents, self._embedding_dim)
 
@@ -167,7 +162,6 @@ class DICGCECategoricalLSTMPolicy(DICGBase):
                 for i in range(len(actions_n))]
 
             if self.state_include_actions:
-                # actions_onehot.shape = (n_envs, self._n_agents, self._action_dim)
                 actions_onehot = torch.zeros(len(obs_n), self._n_agents, self._action_dim)
                 actions_onehot.scatter_(
                     -1, torch.Tensor(actions_n).unsqueeze(-1).type(torch.LongTensor), 1)     
@@ -182,14 +176,9 @@ class DICGCECategoricalLSTMPolicy(DICGBase):
             self._prev_cells = None
 
     def entropy(self, observations, avail_actions, actions=None):
-        # print('obs.shape =', observations.shape)
         dists_n, _ = self.forward(observations, avail_actions, actions)
-        # print('dist =', dists_n)
-        # print('dist.probs =', dists_n.probs)
         entropy = dists_n.entropy()
-        # print('entropy.shapeBefore =', entropy.shape)
         entropy = entropy.mean(axis=-1) # Asuming independent actions
-        # print('entropy.shapeAfter =', entropy.shape)
         return entropy
 
     def log_likelihood(self, observations, avail_actions, actions):
@@ -198,12 +187,8 @@ class DICGCECategoricalLSTMPolicy(DICGBase):
         else:
             dists_n, _ = self.forward(observations, avail_actions)
         llhs = dists_n.log_prob(actions)
-        # llhs.shape = (n_paths, max_path_length, n_agents)
         # For n agents action probability can be treated as independent
-        # Pa = prob_i^n Pa_i
-        # log(Pa) = sum_i^n log(Pa_i)
         llhs = llhs.sum(axis=-1) # Asuming independent actions
-        # llhs.shape = (n_paths, max_path_length)
         return llhs
 
     @property

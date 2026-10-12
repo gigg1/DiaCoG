@@ -49,7 +49,6 @@ class AttnMLPCategoricalMLPPolicy(AttentionMLP):
         embeddings_collection, attention_weights = super().forward(obs_n)
 
         # (n_paths, max_path_length, n_agents, action_space_dim)
-        # or (n_agents, action_space_dim)
         if not self.residual:
             dists_n = \
                 self.categorical_output_layer.forward(embeddings_collection[-1])
@@ -87,25 +86,16 @@ class AttnMLPCategoricalMLPPolicy(AttentionMLP):
             return actions_n, agent_infos_n
 
     def entropy(self, observations, avail_actions):
-        # print('obs.shape =', observations.shape)
         dists_n, _ = self.forward(observations, avail_actions)
-        # print('dist =', dists_n)
-        # print('dist.probs =', dists_n.probs)
         entropy = dists_n.entropy()
-        # print('entropy.shapeBefore =', entropy.shape)
         entropy = entropy.mean(axis=-1) # Asuming independent actions
-        # print('entropy.shapeAfter =', entropy.shape)
         return entropy
 
     def log_likelihood(self, observations, avail_actions, actions):
         dists_n, _ = self.forward(observations, avail_actions)
         llhs = dists_n.log_prob(actions)
-        # llhs.shape = (n_paths, max_path_length, n_agents)
         # For n agents action probability can be treated as independent
-        # Pa = prob_i^n Pa_i
-        # log(Pa) = sum_i^n log(Pa_i)
         llhs = llhs.sum(axis=-1) # Asuming independent actions
-        # llhs.shape = (n_paths, max_path_length)
         return llhs
 
     @property

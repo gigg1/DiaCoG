@@ -3,7 +3,6 @@ import os
 
 current_file_path = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(current_file_path + '/../../')
-# sys.path.append(current_file_path + r'\\..\\..\\')
 
 import socket
 import collections
@@ -61,11 +60,6 @@ def run(args):
         unseeded_exp_dir = './data/' + args.loc + '/' + exp_name[:-7]
         exp_dir = './data/' + args.loc + '/' + exp_name + id_suffix
 
-        # for key, val in exp_layout.items():
-        #     print ("---")
-        #     print (key)
-        #     print (val)
-        #     print (key.format(val))
     else:
         exp_name = args.exp_name
         exp_dir = exp_name
@@ -82,7 +76,6 @@ def run(args):
                          snapshot_gap=1)
 
         def train_predatorprey(ctxt=None, args_dict=vars(args)):
-            # print("1")
             args = SimpleNamespace(**args_dict)
             
             set_seed(args.seed)
@@ -126,10 +119,8 @@ def run(args):
             baseline = GaussianMLPBaseline(env_spec=env.spec,
                                            hidden_sizes=(64, 64, 64))
 
-            # print("2")
             # Set max_path_length <= max_steps
             # If max_path_length > max_steps, algo will pad obs
-            # obs.shape = torch.Size([n_paths, algo.max_path_length, feat_dim])
             algo = CentralizedMAPPO(
                 env_spec=env.spec,
                 policy=policy,
@@ -148,7 +139,6 @@ def run(args):
                 optimization_mini_epochs=args.opt_mini_epochs,
             )
 
-            # print("3")
 
             runner.setup(algo, env,
                 sampler_cls=CentralizedMAOnPolicyVectorizedSampler, 
@@ -156,14 +146,11 @@ def run(args):
             runner.train(n_epochs=args.n_epochs, 
                          batch_size=args.bs)
 
-            # print("4")
 
-        # print("0")
         train_predatorprey(args_dict=vars(args))
 
     elif args.mode in ['restore', 'eval']:
         data = joblib.load(exp_dir + '/params.pkl')
-        # data = joblib.load(exp_dir + '\\params.pkl')
         env = data['env']
         algo = data['algo']
 
@@ -252,7 +239,6 @@ if __name__ == '__main__':
     parser.add_argument('--capture_reward', type=float, default=10)
     parser.add_argument('--agent_visible', type=int, default=1)
     # Algo
-    # parser.add_argument('--max_algo_path_length', type=int, default=n_steps)
     parser.add_argument('--hidden_nonlinearity', type=str, default='tanh')
     parser.add_argument('--discount', type=float, default=0.99)
     parser.add_argument('--center_adv', type=int, default=1)

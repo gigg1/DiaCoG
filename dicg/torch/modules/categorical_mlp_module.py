@@ -75,7 +75,5 @@ class CategoricalMLPModule(MLPModule):
         # Using logits
         dist = Categorical(logits=outputs)
         # # Using softmax then probs (could be numerically unstable)
-        # outputs = F.softmax(outputs, dim=-1)
-        # dist = Categorical(probs=outputs)
         return dist
 

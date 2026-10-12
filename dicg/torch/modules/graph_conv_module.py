@@ -32,7 +32,6 @@ class GraphConvolutionModule(nn.Module):
             support = torch.mm(inputs, self.weight)
             outputs = torch.mm(adj, support)
         elif len(inputs.shape) > 2:
-            # n_paths, max_path_length, n_agents, emb_feat_dim = inputs.size()
             support = torch.matmul(inputs, self.weight)
             # adj dim = (n_paths, max_path_length, n_agents, n_agents)
             # support dim = (n_paths, max_path_length, n_agents, emb_feat_dim)
@@ -55,13 +54,11 @@ class GraphConvolutionModule2(nn.Module):
         self.id = id
         self.activate = activate
         self.activate_type = "relu"
-        #self.activate_type = "tanh"
 
     def forward(self, inputs, adj):
         if len(inputs.shape) == 2:
             outputs = torch.mm(adj, inputs)
         elif len(inputs.shape) > 2:
-            # n_paths, max_path_length, n_agents, emb_feat_dim = inputs.size()
             # adj dim = (n_paths, max_path_length, n_agents, n_agents)
             outputs = torch.matmul(adj, inputs)
             # outputs dim = (n_paths, max_path_length, n_agents, emb_feat_dim)
@@ -69,7 +66,6 @@ class GraphConvolutionModule2(nn.Module):
             if self.activate_type == "relu":
                 return torch.relu(outputs)
             if self.activate_type == "tanh":
-                # print ("tanh")
                 return torch.tanh(outputs)
         else:
             return outputs
@@ -87,7 +83,6 @@ class GraphAPPNP(nn.Module):
             outputs = (1-self.gamma) * outputs + self.gamma * initial_inputs
 
         elif len(inputs.shape) > 2:
-            # n_paths, max_path_length, n_agents, emb_feat_dim = inputs.size()
             # adj dim = (n_paths, max_path_length, n_agents, n_agents)
             outputs = torch.matmul(adj, inputs)
             outputs = (1 - self.gamma) * outputs + self.gamma * initial_inputs

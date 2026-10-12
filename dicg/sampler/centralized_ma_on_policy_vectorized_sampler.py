@@ -172,7 +172,6 @@ class CentralizedMAOnPolicyVectorizedSampler(BatchSampler):
 
             process_time += time.time() - t
             pbar.inc(self._n_envs * self._n_agents)
-            # print(n_samples)
             obses = next_obses
 
         pbar.stop()

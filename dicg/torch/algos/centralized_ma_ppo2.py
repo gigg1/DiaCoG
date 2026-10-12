@@ -158,9 +158,6 @@ class CentralizedMAPPO2(MABatchPolopt):
         obs, avail_actions, actions, rewards, valids, baselines, returns = \
             self.process_samples(itr, paths)
 
-        # print('processed obs.shape =', obs.shape)
-        # print('processed avail_actions.shape=', avail_actions.shape)
-        # print(avail_actions)
 
         with torch.no_grad():
             loss_before = self._compute_loss(itr, obs, avail_actions, actions, 
@@ -173,11 +170,8 @@ class CentralizedMAPPO2(MABatchPolopt):
         grad_norm = []
         step_size = int(np.ceil(len(rewards) / self._optimization_n_minibatches))
 
-        # step_size = int(self._minibatch_size / self.policy._n_agents) \
-        #     if self._minibatch_size else len(rewards)
 
         shuffled_ids = np.random.permutation(len(rewards))
-        # shuffled_ids = np.array(range(len(rewards)))
         print('MultiAgentNumTrajs =', len(rewards))
 
         for mini_epoch in range(self._optimization_mini_epochs):
@@ -190,7 +184,6 @@ class CentralizedMAPPO2(MABatchPolopt):
                                           actions[ids], rewards[ids], 
                                           valids[ids], baselines[ids])
                 if not isinstance(self.baseline, LinearFeatureBaseline):
-                    # baseline_loss = self.baseline.compute_loss(obs[ids], returns[ids])
                     embeddings = self.policy.get_embeddings(obs[ids])
                     baseline_loss = self.baseline.compute_loss(embeddings, returns[ids])
                     self._baseline_optimizer.zero_grad()
@@ -287,10 +280,6 @@ class CentralizedMAPPO2(MABatchPolopt):
             means, variances = list(
                 zip(*[(valid_adv.mean(), valid_adv.var(unbiased=False))
                       for valid_adv in filter_valids(advantages, valids)]))
-            # advantages = F.batch_norm(advantages.t(),
-            #                           torch.Tensor(means),
-            #                           torch.Tensor(variances),
-            #                           eps=self._eps).t()
             advantages = F.batch_norm(advantages.t(),
                                       torch.tensor(means, device=self.device),
                                       torch.tensor(variances, device=self.device),
@@ -504,7 +493,6 @@ class CentralizedMAPPO2(MABatchPolopt):
         else:
             print("---------not isinstance(self.baseline, LinearFeatureBaseline)")
             with torch.no_grad():
-                # baselines = self.baseline.forward(obs)
                 embeddings = self.policy.get_embeddings(obs)
                 baselines = self.baseline.forward(embeddings)
 

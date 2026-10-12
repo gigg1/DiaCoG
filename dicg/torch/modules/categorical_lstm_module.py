@@ -23,7 +23,6 @@ class CategoricalLSTMModule(nn.Module):
         # bias: If ``False``, then the layer does not use bias weights `b_ih` and `b_hh`.
         #     Default: ``True``
         # batch_first: If ``True``, then the input and output tensors are provided
-        #     as (batch, seq, feature). Default: ``False``
         # dropout: If non-zero, introduces a `Dropout` layer on the outputs of each
         #     LSTM layer except the last layer, with dropout probability equal to
         #     :attr:`dropout`. Default: 0
@@ -48,7 +47,6 @@ class CategoricalLSTMModule(nn.Module):
         # Outputs: output, (h_n, c_n)
         # - **output** of shape `(seq_len, batch, num_directions * hidden_size)`: tensor
         #   containing the output features `(h_t)` from the last layer of the LSTM,
-        #   for each `t`. If a :class:`torch.nn.utils.rnn.PackedSequence` has been
         #   given as the input, the output will also be a packed sequence.
 
         #   For the unpacked case, the directions can be separated

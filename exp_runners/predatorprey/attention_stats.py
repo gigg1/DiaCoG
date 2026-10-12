@@ -57,8 +57,6 @@ def plot_attn_stats(distance_vs_weight, exp_dir, penalty):
                                 alpha=0.2)
     avg_weight_plt.set_xlabel('Distance')
     avg_weight_plt.set_ylabel('Avg. Attention Weight')
-    # avg_weight_plt.set_title('predatorprey, grid={}, n_agents={}, n_preys={}'.
-    #     format(args.grid_size, args.n_agents, args.n_preys))
 
     _x, _y = [], []
     for d in distance_vs_n.keys():
@@ -147,7 +145,6 @@ def cosine_similarity(a, b):
 
 def aggregate_dict_by_intervals(input_dict):
     # 创建区间到值的聚合字典
-    # aggregated = defaultdict(list)
     dic = {}
     for key, value in input_dict.items():
         # 计算键所属的区间（0.0-0.1, 0.1-0.2, ..., 0.9-1.0）
@@ -160,7 +157,6 @@ def aggregate_dict_by_intervals(input_dict):
             dic[interval] =[value]
         else:
             dic[interval].append(value)
-        # aggregated[interval].append(value)
 
     return dic
 
@@ -169,40 +165,26 @@ def attn_analysis3(results_folder,exp_folder, args, seeds, de=False):
     phy_d_vs_similarity = {}
     phy_d_vs_weight = {}
     normalize = True
-    # normalize = False
 
-    # remove_dia = True
     remove_dia = False
 
-    # plotMatrix=True
     plotMatrix = False
 
-    # print (results_folder)
-    # print (exp_folder)
     # ("ce", "general", 1), ("de", "general", 1), ("ce", "polarized3", 2), ("de", "polarized3", 2)
     raw_expression = exp_folder+"_seed=*"
     matching_folders = find_folders_with_string(results_folder, raw_expression, seeds)
     print (len(matching_folders), matching_folders)
 
     for exp_dir in matching_folders:
-        # print (exp_dir)
         seed = exp_dir[-1]
-        # print (seed)
         data = joblib.load(exp_dir + '/params.pkl')
         env = data['env']
         algo = data['algo']
         n_agents = env.n_agents
-        # n_agents = 1
-        # args.n_eval_episodes = 2
         print("------", exp_dir)
 
-        # args.n_eval_episodes = 5
-        # args.max_env_steps = 20
-        # args.n_eval_episodes = 300
         for i_eps in range(args.n_eval_episodes):
             print('Eval episode: {}/{}'.format(i_eps + 1, args.n_eval_episodes))
-            # if i_eps>=3:
-            #     continue
             obses = env.reset()
             algo.policy.reset([True])
             for i_step in range(args.max_env_steps):
@@ -213,7 +195,6 @@ def attn_analysis3(results_folder,exp_folder, args, seeds, de=False):
                     attention_weights = algo.baseline.get_attention_weights(obses)
                     attention_matrix = attention_weights.detach().numpy()
                 else:
-                    # attention_weights_0 = agent_infos['attention_weights'][a]
                     attention_matrix = agent_infos['attention_weights']
 
                 if normalize:
@@ -221,13 +202,8 @@ def attn_analysis3(results_folder,exp_folder, args, seeds, de=False):
                     if remove_dia:
                         np.fill_diagonal(attention_matrix_array, 0)
 
-                    # print(attention_matrix_array.shape)
                     degree = np.sum(attention_matrix_array, axis=-1)
-                    # degree_inv = np.diag(np.sqrt(degree))
-                    # degree_inv = np.diag(degree**(-1/2))
-                    # normalized_attention_weights = (degree_inv.dot(attention_matrix_array)).dot(degree_inv)
 
-                    # degree_inv = np.diag(degree ** (-1))
                     degree_inv = np.diag(1.0 / (degree + 1e-12))
                     normalized_attention_weights = degree_inv.dot(attention_matrix_array)
                 else:
@@ -235,25 +211,12 @@ def attn_analysis3(results_folder,exp_folder, args, seeds, de=False):
                     if remove_dia:
                         np.fill_diagonal(attention_matrix_array, 0)
 
-                # for a in range(env.n_agents):
-                # print (obses.shape)
-                # all_obs = env.get_agent_obs()
-                # all_obs = np.array(all_obs)
-                # all_encoding = algo.policy.get_encoder_embedding(obses)
                 if not de:
-                    # all_encoding = algo.policy.get_embeddings(obses)
                     all_encoding = algo.policy.get_embeddings_nodes(obses)
-                    # all_encoding = algo.policy.get_obses(obses)
                 if de:
-                    # all_encoding = algo.baseline.get_embeddings(obses)
                     all_encoding = algo.baseline.get_embeddings_nodes(obses)
-                    # all_encoding = algo.baseline.get_obses(obses)
 
-                # print(all_encoding.shape)
 
-                # print(all_obs[0])
-                # print("")
-                # print (all_obs.shape)
 
                 for a in range(n_agents):
                     if normalize:
@@ -267,10 +230,7 @@ def attn_analysis3(results_folder,exp_folder, args, seeds, de=False):
                             if a == i_agent:
                                 continue
 
-                        # d = np.dot(all_obs[a], all_obs[i_agent])
-                        # d = np.dot(all_obs[a], all_obs[i_agent])
 
-                        # d = cosine_similarity(all_obs[a], all_obs[i_agent])
                         d = cosine_similarity(all_encoding[a], all_encoding[i_agent])
                         
                         d_1 = math.floor(d * 20) / 20 + 0.025
@@ -279,9 +239,6 @@ def attn_analysis3(results_folder,exp_folder, args, seeds, de=False):
                         if d<-1:
                             d_1=-1
 
-                        # print (all_obs[a], all_obs[i_agent])
-                        # print (env.agent_pos[a], env.agent_pos[i_agent])
-                        # print ("")
 
                         phy_d = np.sqrt(
                             (env.agent_pos[a][0] - env.agent_pos[i_agent][0]) ** 2
@@ -334,9 +291,6 @@ def attn_analysis3(results_folder,exp_folder, args, seeds, de=False):
     settings = "nor={}_nagents={}".format(normalize,n_agents)
     y_type = 'Avg. Attention Weight'
     x_type = 'Cosine Similarity'
-    # print(distance_vs_weight)
-    # distance_vs_weight = aggregate_dict_by_intervals(distance_vs_weight)
-    # print(distance_vs_weight)
     plot_attn_stats_simple(distance_vs_weight, results_folder, args.penalty, len(matching_folders), de, args.attention_type, settings, x_type,y_type)
 
     y_type = 'Avg. Cosine Similarity'

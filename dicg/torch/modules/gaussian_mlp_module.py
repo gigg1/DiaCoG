@@ -1,8 +1,6 @@
 """GaussianMLPModule."""
 import torch
 from torch import nn
-# from torch.distributions import Normal, MultivariateNormal
-# from torch.distributions.independent import Independent
 
 from garage.torch.modules.mlp_module import MLPModule
 
@@ -76,7 +74,6 @@ class GaussianMLPModule(nn.Module):
                  output_w_init=nn.init.xavier_uniform_,
                  output_b_init=nn.init.zeros_,
                  learn_std=True,
-                 # duplicate_std_copies=None,
                  share_std=False,
                  init_std=1.0,
                  min_std=1e-6,
@@ -96,7 +93,6 @@ class GaussianMLPModule(nn.Module):
         self._action_dim = output_dim # can be multiagent action dim for centralized
         self._single_agent_action_dim = single_agent_action_dim
         self._learn_std = learn_std
-        # self._duplicate_std_copies = duplicate_std_copies # n agents, for centralized
         self._share_std = share_std
         self._std_hidden_sizes = std_hidden_sizes
         self._min_std = min_std
@@ -164,12 +160,9 @@ class GaussianMLPModule(nn.Module):
         device = inputs.device
         if self._share_std:
             broadcast_shape = list(inputs[0].shape[:-1]) + [self._action_dim]
-            # log_std_uncentered = torch.zeros(*broadcast_shape) + self._init_std
             log_std_uncentered = torch.zeros(*broadcast_shape, device=device) + self._init_std
         else:
             log_std_uncentered = self._init_std
-            # if self._duplicate_std_copies is not None:
-            #     log_std_uncentered = self._init_std.repeat(self._duplicate_std_copies)
 
         if self._min_std_param or self._max_std_param:
             log_std_uncentered = log_std_uncentered.clamp(
@@ -181,13 +174,11 @@ class GaussianMLPModule(nn.Module):
                 std = log_std_uncentered.exp()
             else:
                 std = log_std_uncentered.exp().exp().add(1.).log()
-            # dist = Independent(Normal(mean, std), 1)
         else:
             if self._std_parameterization == 'exp':
                 std = torch.diag(log_std_uncentered.exp())
             else:
                 std = torch.diag(log_std_uncentered.exp().exp().add(1.).log())
-            # dist = MultivariateNormal(mean, std)
 
         return mean, std
 

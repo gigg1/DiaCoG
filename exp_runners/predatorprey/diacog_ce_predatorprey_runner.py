@@ -3,7 +3,6 @@ import os
 
 current_file_path = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(current_file_path + '/../../')
-# sys.path.append(current_file_path + r'\\..\\..\\')
 
 import socket
 import collections
@@ -148,7 +147,6 @@ def run(args):
                 baseline = GaussianMLPMixBaseline2(env_spec=env.spec,
                                                 n_agents=args.n_agents,
                                                 embedding_dim=args.embedding_dim,
-                                                # hidden_sizes=(64,),
                                                 hidden_sizes=(64,64,64),
                                                 aggregator_type=args.aggregator_type,)
 
@@ -176,7 +174,6 @@ def run(args):
             if args.critic_input == "obs":
                 baseline = GaussianMLPMixBaseline(env_spec=env.spec,
                                                    n_agents=args.n_agents,
-                                                   # hidden_sizes=(64,),
                                                     hidden_sizes=(64, 64, 64),
                                                     aggregator_type=args.aggregator_type, )
 
@@ -220,7 +217,6 @@ def run(args):
                              env_saved=env.pickleable, env=env)
         elif args.mode == 'eval':
             # Eval stats:
-            # distance_vs_weight = {}
             traj_len = []
             ep_returns = []
             for i_eps in range(args.n_eval_episodes):
@@ -228,7 +224,6 @@ def run(args):
                 obses = env.reset()
                 algo.policy.reset([True])
 
-                # start_n_agent = 1
                 start_n_agent = env.n_agents
                 ep_return = 0
 
@@ -309,7 +304,6 @@ if __name__ == '__main__':
     parser.add_argument('--capture_reward', type=float, default=10)
     parser.add_argument('--agent_visible', type=int, default=1)
     # Algo
-    # parser.add_argument('--max_algo_path_length', type=int, default=n_steps)
     parser.add_argument('--hidden_nonlinearity', type=str, default='tanh')
     parser.add_argument('--discount', type=float, default=0.99)
     parser.add_argument('--center_adv', type=int, default=1)
